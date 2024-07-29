@@ -1,0 +1,9 @@
+See README for details.
+
+Files:
+Under the profile 'https-jks'
+./jks.p12 (supply passwords via environment variables)
+
+Under the profile 'https-pem'
+./pem.crt
+./pem.key

@@ -1,0 +1,12 @@
+{"properties": [
+  {
+    "name": "pld.recaptchacontext.runinit",
+    "type": "java.lang.Boolean",
+    "description": "Whether to run initialize() inside RecaptchaContext. This is only false for testing."
+  },
+  {
+    "name": "pld.useHttps",
+    "type": "java.lang.Boolean",
+    "description": "Whether the loaded profile supports HTTPS."
+  }
+]}

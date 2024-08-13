@@ -30,25 +30,46 @@ run the PLD App using HTTPS when accepting real end-user data.
 
 To run the app in localhost only mode:
 
-1.  cd into the `pld` directory.
-2.  Run `docker build . -t pld-local`. The app will spend some time testing and
-    compiling all code. When complete you should have a docker image tagged
-    `pld-local`.
-3.  Run `docker run --network host -e RECAPTCHA_PROJECT_ID=<project_id> -e
-    GOOGLE_CLOUD_API_KEY=<api_key> pld-local`.
+1.  Clone this repo:
+     ```
+      git clone https://github.com/GoogleCloudPlatform/reCAPTCHA-PLD
+     ```
 
-This will start the Container running on Port 8080 of the local machine. The
-`--network host` option is required here so that the app can correctly exclude
-non-localhost traffic. Running it with an ordinary port binding (`-p 8080`) will
-be blocked because the traffic coming from outside the docker container is not
-seen as a local origin by the containerized app.
+2.  Build the container:
+     ```
+      docker build . -t pld-local
+     ```
+    The app will spend some time testing and compiling all code. When complete
+    you should have a docker image tagged `pld-local`.
 
-To test the PLD App when it's running you can use a sample cURL command: `curl
--X POST -H "Content-Type: application/json" -d '{ "username":"leakedusername" ,
-"password":"leakedpassword" }' http://localhost:8080/createAssessment && echo
-""`
+3.  Run the container:
+     ```
+     docker run --network host \
+       -e RECAPTCHA_PROJECT_ID=<project_id> \
+       -e GOOGLE_CLOUD_API_KEY=<api_key> \
+       pld-local
+     ```
 
-This should return the JSON Response: `{"leakedStatus":"LEAKED"}`
+This will start the Container running on Port 8080 of the local machine.
+
+Note: The `--network host` option is required here so that the app can correctly
+exclude non-localhost traffic. Running it with an ordinary port binding
+(`-p 8080`) will be blocked because the traffic coming from outside the docker
+container is not seen as a local origin by the containerized app.
+
+To test the PLD App when it's running you can use a sample cURL command:
+
+```
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"username":"leakedusername","password":"leakedpassword"}' \
+  http://localhost:8080/createAssessment && echo ""
+```
+
+This should return the JSON Response:
+
+```
+{"leakedStatus":"LEAKED"}
+````
 
 ## Auth | Application Default Credentials
 
@@ -144,19 +165,32 @@ openssl x509 -req -days 365 -in certs/pem.csr -signkey certs/pem.key -out certs/
 
 ### Sample HTTPS Commands
 
-To run with a `jks / p12` certificate: `docker run -p 8443:8443 -e
-RECAPTCHA_PROJECT_ID=<project_id> -e GOOGLE_CLOUD_API_KEY=<api_key> -e
-JKS_KEY_PASSWORD=<key_password> -e JKS_KEYSTORE_PASSWORD=<keystore_password> -v
-$(pwd)/certs:/app/certs pld-local --spring.profiles.active=https-jks`
+To run with a `jks / p12` certificate:
+```
+docker run -p 8443:8443 \
+  -e RECAPTCHA_PROJECT_ID=<project_id> \
+  -e GOOGLE_CLOUD_API_KEY=<api_key> \
+  -e JKS_KEY_PASSWORD=<key_password> \
+  -e JKS_KEYSTORE_PASSWORD=<keystore_password> \
+  -v $(pwd)/certs:/app/certs \
+  pld-local --spring.profiles.active=https-jks
+```
 
-To run with a `pem` certificate: `docker run -p 8443:8443 -e
-RECAPTCHA_PROJECT_ID=<project_id> -e GOOGLE_CLOUD_API_KEY=<api_key> -v
-$(pwd)/certs:/app/certs pld-local --spring.profiles.active=https-pem`
+To run with a `pem` certificate:
+```
+docker run -p 8443:8443 \
+  -e RECAPTCHA_PROJECT_ID=<project_id> \
+  -e GOOGLE_CLOUD_API_KEY=<api_key> \
+  -v $(pwd)/certs:/app/certs \
+  pld-local --spring.profiles.active=https-pem`
+```
 
 You may test either of these with the sample cURL command:
 
 ```
-curl -X POST -H "Content-Type: application/json" -d '{ "username":"leakedusername" , "password":"leakedpassword" }' -k https://localhost:8443/createAssessment -k && echo ""
+curl -X POST -H "Content-Type: application/json" \
+  -d '{ "username":"leakedusername" , "password":"leakedpassword" }' \
+  -k https://localhost:8443/createAssessment && echo ""
 ```
 
 The `-k` option is added here as a self-signed cert, and this allows cURL to

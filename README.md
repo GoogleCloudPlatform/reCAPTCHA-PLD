@@ -1,4 +1,4 @@
-# reCAPTCHA Password Leak Detection | Container App Microservice
+# reCAPTCHA Password Leak Detection | Container App Microservice (Public Preview)
 
 The PLD Container App is a self-contained implementation of the reCAPTCHA
 Password Leak Detection features built using Docker & Java Spring Boot. The app
@@ -10,6 +10,8 @@ Usernames & passwords sent to the container app are never shared with Google --
 an encrypted username is sent to the service and checked against known
 credential leaks, and then the re-encrypted results of those are verified by the
 client.
+
+Please note this release is currently under [Public Preview](https://cloud.google.com/products?hl=en#product-launch-stages).
 
 ## Important Security Context
 
@@ -196,3 +198,16 @@ curl -X POST -H "Content-Type: application/json" \
 The `-k` option is added here as a self-signed cert, and this allows cURL to
 warn and proceed. For production, use an HTTPS strategy signed by a certificate
 authority instead of a self signed cert.
+
+## Feedback
+
+This repo and the container are currently under [Public Preview](https://cloud.google.com/products?hl=en#product-launch-stages).
+Your feedback is important to our team & helps us improve customer experience
+and value!
+
+For issues and feature requests for the Password Leak Container, you can use our
+[Github Issues](https://github.com/GoogleCloudPlatform/reCAPTCHA-PLD/issues)
+page here.
+
+To learn more about reCAPTCHA Password Leak Protection, and other ways to secure
+user accounts, [Contact User Protection Cloud Sales](https://inthecloud.withgoogle.com/security-ups/contact.html).

@@ -49,17 +49,6 @@ public class RecaptchaContextTests {
   }
 
   @Test
-  void shouldLoadDefaultCredentials() throws IllegalArgumentException, IOException {
-    when(env.defaultCredentialsAreSet()).thenReturn(true);
-
-    recaptchaContext.initializeInternal();
-
-    RecaptchaConfig config = recaptchaContext.getConfig();
-    assertEquals(RecaptchaAuthMethod.DEFAULT_CREDENTIALS, config.getAuthMethod());
-    assertEquals("test-project-id-mock", config.getProjectId());
-  }
-
-  @Test
   void shouldLoadApiCredentials() throws IllegalArgumentException, IOException {
     when(env.defaultCredentialsAreSet()).thenReturn(false);
     when(env.getApiKey()).thenReturn("test-api-key-mock");

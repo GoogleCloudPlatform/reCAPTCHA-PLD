@@ -1,0 +1,20 @@
+version: 2
+updates:
+  # Configuration for Maven dependencies
+  - package-ecosystem: "maven"
+    directory: "/" # Location of your dependency manifests (e.g., pom.xml)
+    schedule:
+      interval: "daily" # Check for updates daily
+
+  # Configuration for Docker dependencies
+  - package-ecosystem: "docker"
+    directory: "/" # Location of Dockerfiles
+    schedule:
+      interval: "daily" # Check for updates daily
+
+  # Configuration for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/" # Location of workflow files (e.g., .github/workflows)
+    schedule:
+      interval: "daily" # Check for updates daily
+

@@ -20,7 +20,7 @@ WORKDIR /build/
 COPY pom.xml /build/
 COPY src /build/src/
 
-RUN mvn test -DAPPLICATION_DEFAULT_CREDENTIALS=testing
+RUN mvn test
 
 RUN mvn clean package -DskipTests
 

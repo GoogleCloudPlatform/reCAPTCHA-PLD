@@ -78,6 +78,7 @@ public class LocalhostPolicyTests {
 
     Boolean result = policy.preHandle(request, response, null);
     assertFalse(result);
-    verify(response).sendError(HttpServletResponse.SC_FORBIDDEN, Messages.LOCALHOST_OR_HTTPS_ONLY_MESSAGE);
+    verify(response)
+        .sendError(HttpServletResponse.SC_FORBIDDEN, Messages.LOCALHOST_OR_HTTPS_ONLY_MESSAGE);
   }
 }

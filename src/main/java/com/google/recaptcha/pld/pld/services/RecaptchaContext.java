@@ -154,5 +154,5 @@ public class RecaptchaContext {
             throw e;
           }
         });
-      }
+  }
 }

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerification;
 import com.google.recaptcha.pld.pld.model.PlaintextCredentials;
 import com.google.recaptcha.pld.pld.model.PldLeakedResult;
 import com.google.recaptcha.pld.pld.model.PldLeakedStatus;
+import com.google.recaptcha.pld.pld.model.VerificationResponse;
 import com.google.recaptcha.pld.pld.services.PldService;
 import com.google.recaptcha.pld.pld.services.RecaptchaContext;
 import jakarta.validation.Valid;
@@ -30,6 +31,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import com.google.recaptcha.pld.pld.model.CreateAmendedAssessmentRequest;
+import com.google.recaptcha.pld.pld.model.CreateAmendedAssessmentResponse;
+import java.util.Base64;
 
 @RestController
 public class PldController {
@@ -54,6 +58,19 @@ public class PldController {
         .thenApply(status -> new PldLeakedResult(status));
   }
 
+  @PostMapping("/createAmendedAssessment")
+  public CompletableFuture<CreateAmendedAssessmentResponse> postCreateAmendedAssessment(
+      @Valid @RequestBody CreateAmendedAssessmentRequest request)
+      throws InterruptedException, ExecutionException {
+
+    return pldService
+        .newPasswordCheckVerification(request.getCredentials())
+        .thenCompose(
+            verification ->
+                recaptchaContext.createAssessmentAsync(verification, request.getAssessment()))
+        .thenCompose(response -> populateVerification(response));
+  }
+
   private CompletableFuture<PldLeakedStatus> executePasswordLeakAssessment(
       PasswordCheckVerification verification) {
     return recaptchaContext
@@ -67,6 +84,23 @@ public class PldController {
                 pldResult.areCredentialsLeaked()
                     ? PldLeakedStatus.LEAKED
                     : PldLeakedStatus.NO_STATUS);
+  }
+
+  private CompletableFuture<CreateAmendedAssessmentResponse> populateVerification(
+      VerificationResponse verificationResponse) {
+
+    return pldService
+        .verifyAssessment(
+            verificationResponse.getPasswordCheckVerification(),
+            verificationResponse.getAssessment().getPrivatePasswordLeakVerification())
+        .thenApply(
+            pldResult ->
+                new CreateAmendedAssessmentResponse(
+                    Base64.getEncoder()
+                        .encodeToString(verificationResponse.getAssessment().toByteArray()),
+                    pldResult.areCredentialsLeaked()
+                        ? PldLeakedStatus.LEAKED
+                        : PldLeakedStatus.NO_STATUS));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

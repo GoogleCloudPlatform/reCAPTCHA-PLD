@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import com.google.protobuf.ByteString;
 import com.google.recaptcha.pld.pld.model.Messages;
 import com.google.recaptcha.pld.pld.model.RecaptchaAuthMethod;
 import com.google.recaptcha.pld.pld.model.RecaptchaConfig;
+import com.google.recaptcha.pld.pld.model.VerificationResponse;
 import com.google.recaptcha.pld.pld.util.PldEnvironment;
 import com.google.recaptchaenterprise.v1.Assessment;
 import com.google.recaptchaenterprise.v1.PrivatePasswordLeakVerification;
@@ -33,6 +34,8 @@ import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import com.google.protobuf.InvalidProtocolBufferException;
+import java.util.Base64;
 
 @Service
 public class RecaptchaContext {
@@ -122,8 +125,8 @@ public class RecaptchaContext {
         "Recaptcha Client was not created because no valid Auth Method was found.");
   }
 
-  public CompletableFuture<Assessment> createAssessmentAsync(
-      PasswordCheckVerification clientEncryptedCredentials) {
+  public CompletableFuture<VerificationResponse> createAssessmentAsync(
+      PasswordCheckVerification clientEncryptedCredentials, String requestAssessment) {
     if (clientEncryptedCredentials.getLookupHashPrefix() == null
         || clientEncryptedCredentials.getEncryptedUserCredentialsHash() == null) {
       throw new IllegalArgumentException(Messages.INTERNAL_CREDENTIALS_ARE_NULL_MESSAGE);
@@ -139,20 +142,35 @@ public class RecaptchaContext {
                           clientEncryptedCredentials.getEncryptedUserCredentialsHash()))
                   .build();
 
-          Assessment requestAssessment =
-              Assessment.newBuilder().setPrivatePasswordLeakVerification(pldVerification).build();
-
           try {
+            Assessment amendedRequest =
+                Assessment.parseFrom(Base64.getDecoder().decode(requestAssessment.getBytes()))
+                    .toBuilder()
+                    .setPrivatePasswordLeakVerification(pldVerification)
+                    .build();
+
             Assessment responseAssessment =
                 recaptchaClient.createAssessment(
-                    "projects/" + config.getProjectId(), requestAssessment);
+                    "projects/" + config.getProjectId(), amendedRequest);
 
-            return responseAssessment;
+            return new VerificationResponse(responseAssessment, clientEncryptedCredentials);
           } catch (ApiException apiException) {
             throw apiException;
+          } catch (InvalidProtocolBufferException InvalidProtocolBufferException) {
+            throw new IllegalArgumentException(Messages.INVALID_ASSESSMENT_BYTE_STREAM);
           } catch (Exception e) {
             throw e;
           }
         });
+  }
+
+  public CompletableFuture<Assessment> createAssessmentAsync(
+      PasswordCheckVerification clientEncryptedCredentials) {
+
+    Assessment requestAssessment = Assessment.newBuilder().build();
+    return this.createAssessmentAsync(
+            clientEncryptedCredentials,
+            Base64.getEncoder().encodeToString(requestAssessment.toByteArray()))
+        .thenApply(response -> response.getAssessment());
   }
 }

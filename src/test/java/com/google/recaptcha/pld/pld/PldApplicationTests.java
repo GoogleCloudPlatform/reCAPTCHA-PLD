@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     https://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,6 +25,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import java.util.Base64;
+import com.google.recaptchaenterprise.v1.Assessment;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -81,5 +83,22 @@ class PldApplicationTests {
   public void testThreadPoolCount() {
     final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) passwordCheckExecutorService;
     assertEquals(5, threadPool.getCorePoolSize());
+  }
+
+  @Test
+  void validCreateAmendedAssessmentSucceeds() throws Exception {
+
+    Assessment assessment = Assessment.newBuilder().build();
+    mockMvc
+        .perform(
+            post("/createAmendedAssessment")
+                .accept("application/json")
+                .contentType("application/json")
+                .content(
+                    String.format(
+                        "{ \"credentials\": { \"username\":\"usernameABC\","
+                            + " \"password\":\"password123\" }, \"assessment\": \"%s\" } ",
+                        Base64.getEncoder().encodeToString(assessment.toByteArray()))))
+        .andExpect(status().isOk());
   }
 }

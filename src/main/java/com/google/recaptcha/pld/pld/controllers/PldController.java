@@ -13,10 +13,15 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.controllers;
 
+import static com.google.recaptcha.pld.pld.util.ByteStringEncoder.toByteString;
+
 import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerification;
+import com.google.recaptcha.pld.pld.model.AmendAssessmentRequest;
+import com.google.recaptcha.pld.pld.model.AmendAssessmentResponse;
 import com.google.recaptcha.pld.pld.model.PlaintextCredentials;
 import com.google.recaptcha.pld.pld.model.PldLeakedResult;
 import com.google.recaptcha.pld.pld.model.PldLeakedStatus;
+import com.google.recaptcha.pld.pld.model.VerificationResponse;
 import com.google.recaptcha.pld.pld.services.PldService;
 import com.google.recaptcha.pld.pld.services.RecaptchaContext;
 import jakarta.validation.Valid;
@@ -54,6 +59,18 @@ public class PldController {
         .thenApply(status -> new PldLeakedResult(status));
   }
 
+  @PostMapping("/amendAssessment")
+  public CompletableFuture<AmendAssessmentResponse> postAmendAssessment(
+      @Valid @RequestBody AmendAssessmentRequest request)
+      throws InterruptedException, ExecutionException {
+    return pldService
+        .newPasswordCheckVerification(request.getCredentials())
+        .thenCompose(
+            verification ->
+                recaptchaContext.createAssessmentAsync(verification, request.getAssessment()))
+        .thenCompose(response -> populateAmendedResponse(response));
+  }
+
   private CompletableFuture<PldLeakedStatus> executePasswordLeakAssessment(
       PasswordCheckVerification verification) {
     return recaptchaContext
@@ -67,6 +84,22 @@ public class PldController {
                 pldResult.areCredentialsLeaked()
                     ? PldLeakedStatus.LEAKED
                     : PldLeakedStatus.NO_STATUS);
+  }
+
+  private CompletableFuture<AmendAssessmentResponse> populateAmendedResponse(
+      VerificationResponse response) {
+
+    return pldService
+        .verifyAssessment(
+            response.getPasswordCheckVerification(),
+            response.getAssessment().getPrivatePasswordLeakVerification())
+        .thenApply(
+            pldResult ->
+                new AmendAssessmentResponse(
+                    toByteString(response.getAssessment()),
+                    pldResult.areCredentialsLeaked()
+                        ? PldLeakedStatus.LEAKED
+                        : PldLeakedStatus.NO_STATUS));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

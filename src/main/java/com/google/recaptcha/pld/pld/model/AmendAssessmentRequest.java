@@ -13,15 +13,20 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.google.recaptcha.pld.pld.util.AssessmentJsonComponent.Deserializer;
+import com.google.recaptchaenterprise.v1.Assessment;
 import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 public class AmendAssessmentRequest {
   @Valid private PlaintextCredentials credentials;
-  private String assessment;
 
-  public AmendAssessmentRequest(@Valid PlaintextCredentials credentials, String assessment) {
+  @JsonDeserialize(using = Deserializer.class)
+  private Assessment assessment;
+
+  public AmendAssessmentRequest(@Valid PlaintextCredentials credentials, Assessment assessment) {
     this.credentials = credentials;
     this.assessment = assessment;
   }
@@ -30,15 +35,7 @@ public class AmendAssessmentRequest {
     return credentials;
   }
 
-  public void setCredentials(PlaintextCredentials credentials) {
-    this.credentials = credentials;
-  }
-
-  public String getAssessment() {
+  public Assessment getAssessment() {
     return assessment;
-  }
-
-  public void setAssessment(String assessment) {
-    this.assessment = assessment;
   }
 }

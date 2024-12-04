@@ -83,21 +83,34 @@ will look like
     "username": "leakedusername",
     "password": "leakedpassword"
   },
-  "assessment": "assessment-byte-string"
+  "assessment": {
+    "event": {
+      "siteKey": "your-site-key",
+      "token": "your-token"
+    }
+  }
 }
 ```
 
-where the value for `"assessment"` should be a base64 encoded byte string. The response
-will look like
+where the value for `"assessment"` should be the json representation of an
+[Assessment](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments#Assessment).
 
 ```json
 {
   "pldLeakedStatus": "LEAKED",
-  "assessment": "assessment-byte-string"
+  "assessment": {
+    "tokenProperties": {
+      "valid": true
+    },
+    "riskAnalysis": {
+      "score": 0.9
+    }
+  }
 }
 ```
 
-where again the value of the `"assessment"` field will be a base64 encoded byte string.
+where the value of the `"assessment"` field will again be the json representation of an
+[Assessment](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments#Assessment).
 
 ## Auth | Application Default Credentials
 

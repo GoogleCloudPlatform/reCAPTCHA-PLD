@@ -13,28 +13,26 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.google.recaptcha.pld.pld.util.AssessmentJsonComponent.Serializer;
+import com.google.recaptchaenterprise.v1.Assessment;
+
 public class AmendAssessmentResponse {
-  private String assessment;
+  @JsonSerialize(using = Serializer.class)
+  private Assessment assessment;
+
   private PldLeakedStatus pldLeakedStatus;
 
-  public AmendAssessmentResponse(String assessment, PldLeakedStatus pldLeakedStatus) {
+  public AmendAssessmentResponse(Assessment assessment, PldLeakedStatus pldLeakedStatus) {
     this.assessment = assessment;
     this.pldLeakedStatus = pldLeakedStatus;
   }
 
-  public String getAssessment() {
+  public Assessment getAssessment() {
     return assessment;
-  }
-
-  public void setAssessment(String assessment) {
-    this.assessment = assessment;
   }
 
   public PldLeakedStatus getPldLeakedStatus() {
     return pldLeakedStatus;
-  }
-
-  public void setPldLeakedStatus(PldLeakedStatus pldLeakedStatus) {
-    this.pldLeakedStatus = pldLeakedStatus;
   }
 }

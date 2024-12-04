@@ -13,13 +13,10 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld;
 
-import static com.google.recaptcha.pld.pld.util.ByteStringEncoder.toByteString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.google.recaptchaenterprise.v1.Assessment;
-import com.google.recaptchaenterprise.v1.Event;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import org.junit.jupiter.api.Test;
@@ -104,28 +101,25 @@ class PldApplicationTests {
 
   @Test
   void validAmendAssessmentSucceeds() throws Exception {
-    Assessment assessment =
-        Assessment.newBuilder()
-            .setEvent(Event.newBuilder().setToken("fake-token").setSiteKey("fake-site-key").build())
-            .build();
-
     mockMvc
         .perform(
             post("/amendAssessment")
-                .accept("application/json")
                 .contentType("application/json")
                 .content(
-                    String.format(
-                        """
-                        {
-                          "credentials": {
-                            "username": "usernameABC",
-                            "password": "password123"
-                          },
-                          "assessment": "%s"
+                    """
+                    {
+                      "credentials": {
+                        "username": "usernameABC",
+                        "password": "password123"
+                      },
+                      "assessment": {
+                        "event": {
+                          "siteKey": "fake-site-key",
+                          "token": "fake-token"
                         }
-                        """,
-                        toByteString(assessment))))
+                      }
+                    }
+                    """))
         .andExpect(status().isOk());
   }
 }

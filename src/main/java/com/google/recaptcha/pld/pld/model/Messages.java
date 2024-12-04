@@ -26,6 +26,4 @@ public class Messages {
       "Internal Error -- Encrypted Credentials missing required information.";
   public static final String LOCALHOST_OR_HTTPS_ONLY_MESSAGE =
       "Forbidden Request -- HTTPS must be enabled to accept non-localhost connections.";
-  public static final String INVALID_ASSESSMENT_BYTE_STREAM =
-      "Invalid Argument: Provided byte stream not convertible to Assessment protobuf object.";
 }

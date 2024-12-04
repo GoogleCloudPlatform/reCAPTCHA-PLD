@@ -13,8 +13,6 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.controllers;
 
-import static com.google.recaptcha.pld.pld.util.ByteStringEncoder.toByteString;
-
 import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerification;
 import com.google.recaptcha.pld.pld.model.AmendAssessmentRequest;
 import com.google.recaptcha.pld.pld.model.AmendAssessmentResponse;
@@ -96,7 +94,7 @@ public class PldController {
         .thenApply(
             pldResult ->
                 new AmendAssessmentResponse(
-                    toByteString(response.getAssessment()),
+                    response.getAssessment(),
                     pldResult.areCredentialsLeaked()
                         ? PldLeakedStatus.LEAKED
                         : PldLeakedStatus.NO_STATUS));

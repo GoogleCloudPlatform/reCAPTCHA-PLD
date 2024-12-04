@@ -25,6 +25,8 @@ public class PlaintextCredentials {
   @NotBlank(message = "password is required")
   private String password;
 
+  public PlaintextCredentials() {}
+
   public PlaintextCredentials(String username, String password) {
     this.username = username;
     this.password = password;

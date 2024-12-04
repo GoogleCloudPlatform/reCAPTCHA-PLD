@@ -13,9 +13,6 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.services;
 
-import static com.google.recaptcha.pld.pld.util.ByteStringEncoder.fromByteString;
-import static com.google.recaptcha.pld.pld.util.ByteStringEncoder.toByteString;
-
 import com.google.api.gax.core.NoCredentialsProvider;
 import com.google.api.gax.rpc.ApiException;
 import com.google.api.gax.rpc.FixedHeaderProvider;
@@ -36,7 +33,9 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RecaptchaContext {
@@ -98,6 +97,12 @@ public class RecaptchaContext {
     this.config = loadedConfig;
   }
 
+  private ResponseStatusException convertGrpcException(ApiException exception) {
+    return new ResponseStatusException(
+        HttpStatus.valueOf(exception.getStatusCode().getCode().getHttpStatusCode()),
+        "gRPC error: " + exception.getMessage());
+  }
+
   private void initializeClient() throws IOException, IllegalStateException {
     if (config.getAuthMethod() == RecaptchaAuthMethod.API_KEY) {
       RecaptchaEnterpriseServiceSettings settings =
@@ -127,7 +132,7 @@ public class RecaptchaContext {
   }
 
   public CompletableFuture<VerificationResponse> createAssessmentAsync(
-      PasswordCheckVerification clientEncryptedCredentials, String requestAssessment) {
+      PasswordCheckVerification clientEncryptedCredentials, Assessment requestAssessment) {
     if (clientEncryptedCredentials.getLookupHashPrefix() == null
         || clientEncryptedCredentials.getEncryptedUserCredentialsHash() == null) {
       throw new IllegalArgumentException(Messages.INTERNAL_CREDENTIALS_ARE_NULL_MESSAGE);
@@ -145,7 +150,7 @@ public class RecaptchaContext {
 
           try {
             Assessment amendedRequest =
-                fromByteString(requestAssessment).toBuilder()
+                requestAssessment.toBuilder()
                     .setPrivatePasswordLeakVerification(pldVerification)
                     .build();
 
@@ -155,7 +160,7 @@ public class RecaptchaContext {
 
             return new VerificationResponse(responseAssessment, clientEncryptedCredentials);
           } catch (ApiException apiException) {
-            throw apiException;
+            throw convertGrpcException(apiException);
           } catch (Exception e) {
             throw e;
           }
@@ -165,7 +170,7 @@ public class RecaptchaContext {
   public CompletableFuture<Assessment> createAssessmentAsync(
       PasswordCheckVerification clientEncryptedCredentials) {
     Assessment requestAssessment = Assessment.newBuilder().build();
-    return this.createAssessmentAsync(clientEncryptedCredentials, toByteString(requestAssessment))
+    return this.createAssessmentAsync(clientEncryptedCredentials, requestAssessment)
         .thenApply(response -> response.getAssessment());
   }
 }

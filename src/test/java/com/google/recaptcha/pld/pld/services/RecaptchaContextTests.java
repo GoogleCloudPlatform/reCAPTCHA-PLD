@@ -16,7 +16,6 @@ package com.google.recaptcha.pld.pld.services;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerifier;
 import com.google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseServiceClient;
 import com.google.cloud.recaptchaenterprise.v1.RecaptchaEnterpriseServiceSettings;
 import com.google.recaptcha.pld.pld.model.Messages;
@@ -24,8 +23,6 @@ import com.google.recaptcha.pld.pld.model.RecaptchaAuthMethod;
 import com.google.recaptcha.pld.pld.model.RecaptchaConfig;
 import com.google.recaptcha.pld.pld.util.PldEnvironment;
 import java.io.IOException;
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.Executors;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,28 +94,5 @@ public class RecaptchaContextTests {
     IllegalArgumentException ex =
         assertThrows(IllegalArgumentException.class, () -> recaptchaContext.initializeInternal());
     assertEquals(Messages.EMPTY_API_KEY_MESSAGE, ex.getMessage());
-  }
-
-  @Test
-  void shouldRejectInvalidAssessmentByteString() throws IllegalArgumentException, IOException {
-    when(env.defaultCredentialsAreSet()).thenReturn(false);
-    when(env.getApiKey()).thenReturn("test-api-key-mock");
-    recaptchaContext.initializeInternal();
-    PasswordCheckVerifier pldVerifier = new PasswordCheckVerifier(Executors.newFixedThreadPool(1));
-
-    CompletionException ex =
-        assertThrows(
-            CompletionException.class,
-            () ->
-                pldVerifier
-                    .createVerification("username", "fake-password")
-                    .thenCompose(
-                        verification ->
-                            recaptchaContext.createAssessmentAsync(
-                                verification, "invalid-assessment-byte-string"))
-                    .join());
-
-    assertInstanceOf(IllegalArgumentException.class, ex.getCause());
-    assertTrue(ex.getMessage().contains(Messages.INVALID_ASSESSMENT_BYTE_STREAM));
   }
 }

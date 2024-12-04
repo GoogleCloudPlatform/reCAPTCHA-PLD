@@ -1,4 +1,5 @@
 docker
 google-cloud-recaptcha-enterprise
+protobuf
 requests
 urllib3

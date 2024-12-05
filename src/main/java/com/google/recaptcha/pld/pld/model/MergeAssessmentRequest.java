@@ -20,13 +20,13 @@ import jakarta.validation.Valid;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public class AmendAssessmentRequest {
+public class MergeAssessmentRequest {
   @Valid private PlaintextCredentials credentials;
 
   @JsonDeserialize(using = Deserializer.class)
   private Assessment assessment;
 
-  public AmendAssessmentRequest(@Valid PlaintextCredentials credentials, Assessment assessment) {
+  public MergeAssessmentRequest(@Valid PlaintextCredentials credentials, Assessment assessment) {
     this.credentials = credentials;
     this.assessment = assessment;
   }

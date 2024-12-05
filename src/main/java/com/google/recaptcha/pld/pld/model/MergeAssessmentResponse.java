@@ -17,13 +17,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.recaptcha.pld.pld.util.AssessmentJsonComponent.Serializer;
 import com.google.recaptchaenterprise.v1.Assessment;
 
-public class AmendAssessmentResponse {
+public class MergeAssessmentResponse {
   @JsonSerialize(using = Serializer.class)
   private Assessment assessment;
 
   private PldLeakedStatus pldLeakedStatus;
 
-  public AmendAssessmentResponse(Assessment assessment, PldLeakedStatus pldLeakedStatus) {
+  public MergeAssessmentResponse(Assessment assessment, PldLeakedStatus pldLeakedStatus) {
     this.assessment = assessment;
     this.pldLeakedStatus = pldLeakedStatus;
   }

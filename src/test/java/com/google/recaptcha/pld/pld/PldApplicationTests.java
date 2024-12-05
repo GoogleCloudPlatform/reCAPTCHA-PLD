@@ -100,10 +100,10 @@ class PldApplicationTests {
   }
 
   @Test
-  void validAmendAssessmentSucceeds() throws Exception {
+  void validMergeAssessmentSucceeds() throws Exception {
     mockMvc
         .perform(
-            post("/amendAssessment")
+            post("/mergeAssessment")
                 .contentType("application/json")
                 .content(
                     """

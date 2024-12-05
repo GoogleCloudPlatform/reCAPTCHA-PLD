@@ -149,14 +149,14 @@ public class RecaptchaContext {
                   .build();
 
           try {
-            Assessment amendedRequest =
+            Assessment mergeedRequest =
                 requestAssessment.toBuilder()
                     .setPrivatePasswordLeakVerification(pldVerification)
                     .build();
 
             Assessment responseAssessment =
                 recaptchaClient.createAssessment(
-                    "projects/" + config.getProjectId(), amendedRequest);
+                    "projects/" + config.getProjectId(), mergeedRequest);
 
             return new VerificationResponse(responseAssessment, clientEncryptedCredentials);
           } catch (ApiException apiException) {

@@ -73,7 +73,7 @@ This should return the JSON Response:
 {"leakedStatus":"LEAKED"}
 ```
 
-Alternatively there is another endpoint `/amendAssessment` that will send a password
+Alternatively there is another endpoint `/mergeAssessment` that will send a password
 leak request along with an existing [CreateAssessment request](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments/create). The body of this request
 will look like
 
@@ -242,6 +242,10 @@ authority instead of a self signed cert.
 
 To run the end-to-end tests:
 
+> [!WARNING]
+> These tests make calls to the [reCAPTCHA API](https://cloud.google.com/recaptcha/docs/apis) which
+> will count towards your [billed assessments](https://cloud.google.com/security/products/recaptcha#pricing) for that GCP project.
+
 1. [Optional] Setup a virtual environment
 ```
 python -m venv virtualenv
@@ -255,11 +259,11 @@ pip install -r testing/requirements.txt
 
 3. Run the unit tests
 ```
-python tests/amend_assessment_test.py --recaptcha-project-id=your-project-id --google-cloud-api-key=your-api-key --recaptcha-site-key=your-recaptcha-site-key
+python tests/merge_assessment_test.py --recaptcha-project-id=your-project-id --google-cloud-api-key=your-api-key --recaptcha-site-key=your-recaptcha-site-key
 ```
 You can run the following to see a more detailed description of the command-line arguments
 ```
-python tests/amend_assessment_test.py --help
+python tests/merge_assessment_test.py --help
 ```
 
 ## Feedback

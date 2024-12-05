@@ -14,7 +14,7 @@ import urllib3
 TEST_IMAGE_NAME = "test-pld-image"
 TEST_CONTAINER_NAME = "test-pld"
 TEST_CONTAINER_ADDRESS = "http://localhost:8080"
-TEST_CONTAINER_ENDPOINT = "/amendAssessment"
+TEST_CONTAINER_ENDPOINT = "/mergeAssessment"
 
 
 env_vars = {
@@ -24,7 +24,7 @@ env_vars = {
 }
 
 
-class TestAmendAssessment(unittest.TestCase):
+class TestMergeAssessment(unittest.TestCase):
 
   @staticmethod
   def _wait_for_docker_container():
@@ -82,7 +82,7 @@ class TestAmendAssessment(unittest.TestCase):
         network_mode="host",
         remove=True,
     )
-    TestAmendAssessment._wait_for_docker_container()
+    TestMergeAssessment._wait_for_docker_container()
 
   def test_empty_assessment_with_leaked_creds(self):
     response = self._send_assessment(

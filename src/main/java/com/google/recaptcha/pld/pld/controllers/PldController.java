@@ -14,8 +14,8 @@
 package com.google.recaptcha.pld.pld.controllers;
 
 import com.google.cloud.recaptcha.passwordcheck.PasswordCheckVerification;
-import com.google.recaptcha.pld.pld.model.AmendAssessmentRequest;
-import com.google.recaptcha.pld.pld.model.AmendAssessmentResponse;
+import com.google.recaptcha.pld.pld.model.MergeAssessmentRequest;
+import com.google.recaptcha.pld.pld.model.MergeAssessmentResponse;
 import com.google.recaptcha.pld.pld.model.PlaintextCredentials;
 import com.google.recaptcha.pld.pld.model.PldLeakedResult;
 import com.google.recaptcha.pld.pld.model.PldLeakedStatus;
@@ -57,16 +57,16 @@ public class PldController {
         .thenApply(status -> new PldLeakedResult(status));
   }
 
-  @PostMapping("/amendAssessment")
-  public CompletableFuture<AmendAssessmentResponse> postAmendAssessment(
-      @Valid @RequestBody AmendAssessmentRequest request)
+  @PostMapping("/mergeAssessment")
+  public CompletableFuture<MergeAssessmentResponse> postMergeAssessment(
+      @Valid @RequestBody MergeAssessmentRequest request)
       throws InterruptedException, ExecutionException {
     return pldService
         .newPasswordCheckVerification(request.getCredentials())
         .thenCompose(
             verification ->
                 recaptchaContext.createAssessmentAsync(verification, request.getAssessment()))
-        .thenCompose(response -> populateAmendedResponse(response));
+        .thenCompose(response -> populateMergedResponse(response));
   }
 
   private CompletableFuture<PldLeakedStatus> executePasswordLeakAssessment(
@@ -84,7 +84,7 @@ public class PldController {
                     : PldLeakedStatus.NO_STATUS);
   }
 
-  private CompletableFuture<AmendAssessmentResponse> populateAmendedResponse(
+  private CompletableFuture<MergeAssessmentResponse> populateMergedResponse(
       VerificationResponse response) {
 
     return pldService
@@ -93,7 +93,7 @@ public class PldController {
             response.getAssessment().getPrivatePasswordLeakVerification())
         .thenApply(
             pldResult ->
-                new AmendAssessmentResponse(
+                new MergeAssessmentResponse(
                     response.getAssessment(),
                     pldResult.areCredentialsLeaked()
                         ? PldLeakedStatus.LEAKED

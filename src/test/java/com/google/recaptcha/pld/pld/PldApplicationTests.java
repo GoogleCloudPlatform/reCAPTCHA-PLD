@@ -52,7 +52,13 @@ class PldApplicationTests {
         .perform(
             post("/createAssessment")
                 .contentType("application/json")
-                .content(" { \"username\":\"usernameABC\", \"password\":\"password123\" } "))
+                .content(
+                    """
+                    {
+                      "username": "usernameABC",
+                      "password": "password123"
+                    }
+                    """))
         .andExpect(status().isOk());
   }
 
@@ -66,14 +72,24 @@ class PldApplicationTests {
         .perform(
             post("/createAssessment")
                 .contentType("application/json")
-                .content(" { \"username\":\"usernameABC\"} "))
+                .content(
+                    """
+                    {
+                      "username": "usernameABC"
+                    }
+                    """))
         .andExpect(status().isBadRequest());
 
     mockMvc
         .perform(
             post("/createAssessment")
                 .contentType("application/json")
-                .content("{ \"password\":\"password123\" }"))
+                .content(
+                    """
+                    {
+                      "password": "password123"
+                    }
+                    """))
         .andExpect(status().isBadRequest());
   }
 
@@ -81,5 +97,29 @@ class PldApplicationTests {
   public void testThreadPoolCount() {
     final ThreadPoolExecutor threadPool = (ThreadPoolExecutor) passwordCheckExecutorService;
     assertEquals(5, threadPool.getCorePoolSize());
+  }
+
+  @Test
+  void validMergeAssessmentSucceeds() throws Exception {
+    mockMvc
+        .perform(
+            post("/mergeAssessment")
+                .contentType("application/json")
+                .content(
+                    """
+                    {
+                      "credentials": {
+                        "username": "usernameABC",
+                        "password": "password123"
+                      },
+                      "assessment": {
+                        "event": {
+                          "siteKey": "fake-site-key",
+                          "token": "fake-token"
+                        }
+                      }
+                    }
+                    """))
+        .andExpect(status().isOk());
   }
 }

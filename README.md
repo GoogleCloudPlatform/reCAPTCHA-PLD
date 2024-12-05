@@ -69,9 +69,48 @@ curl -X POST -H "Content-Type: application/json" \
 
 This should return the JSON Response:
 
-```
+```json
 {"leakedStatus":"LEAKED"}
-````
+```
+
+Alternatively there is another endpoint `/mergeAssessment` that will send a password
+leak request along with an existing [CreateAssessment request](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments/create). The body of this request
+will look like
+
+```json
+{
+  "credentials": {
+    "username": "leakedusername",
+    "password": "leakedpassword"
+  },
+  "assessment": {
+    "event": {
+      "siteKey": "your-site-key",
+      "token": "your-token"
+    }
+  }
+}
+```
+
+where the value for `"assessment"` should be the json representation of an
+[Assessment](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments#Assessment).
+
+```json
+{
+  "pldLeakedStatus": "LEAKED",
+  "assessment": {
+    "tokenProperties": {
+      "valid": true
+    },
+    "riskAnalysis": {
+      "score": 0.9
+    }
+  }
+}
+```
+
+where the value of the `"assessment"` field will again be the json representation of an
+[Assessment](https://cloud.google.com/recaptcha/docs/reference/rest/v1/projects.assessments#Assessment).
 
 ## Auth | Application Default Credentials
 
@@ -198,6 +237,34 @@ curl -X POST -H "Content-Type: application/json" \
 The `-k` option is added here as a self-signed cert, and this allows cURL to
 warn and proceed. For production, use an HTTPS strategy signed by a certificate
 authority instead of a self signed cert.
+
+## Testing
+
+To run the end-to-end tests:
+
+> [!WARNING]
+> These tests make calls to the [reCAPTCHA API](https://cloud.google.com/recaptcha/docs/apis) which
+> will count towards your [billed assessments](https://cloud.google.com/security/products/recaptcha#pricing) for that GCP project.
+
+1. [Optional] Setup a virtual environment
+```
+python -m venv virtualenv
+source virtualenv/bin/activate
+```
+
+2. Install dependencies
+```
+pip install -r testing/requirements.txt
+```
+
+3. Run the unit tests
+```
+python tests/merge_assessment_test.py --recaptcha-project-id=your-project-id --google-cloud-api-key=your-api-key --recaptcha-site-key=your-recaptcha-site-key
+```
+You can run the following to see a more detailed description of the command-line arguments
+```
+python tests/merge_assessment_test.py --help
+```
 
 ## Feedback
 

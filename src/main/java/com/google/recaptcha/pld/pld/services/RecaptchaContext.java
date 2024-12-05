@@ -23,6 +23,7 @@ import com.google.protobuf.ByteString;
 import com.google.recaptcha.pld.pld.model.Messages;
 import com.google.recaptcha.pld.pld.model.RecaptchaAuthMethod;
 import com.google.recaptcha.pld.pld.model.RecaptchaConfig;
+import com.google.recaptcha.pld.pld.model.VerificationResponse;
 import com.google.recaptcha.pld.pld.util.PldEnvironment;
 import com.google.recaptchaenterprise.v1.Assessment;
 import com.google.recaptchaenterprise.v1.PrivatePasswordLeakVerification;
@@ -32,7 +33,9 @@ import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class RecaptchaContext {
@@ -94,6 +97,12 @@ public class RecaptchaContext {
     this.config = loadedConfig;
   }
 
+  private ResponseStatusException convertGrpcException(ApiException exception) {
+    return new ResponseStatusException(
+        HttpStatus.valueOf(exception.getStatusCode().getCode().getHttpStatusCode()),
+        "gRPC error: " + exception.getMessage());
+  }
+
   private void initializeClient() throws IOException, IllegalStateException {
     if (config.getAuthMethod() == RecaptchaAuthMethod.API_KEY) {
       RecaptchaEnterpriseServiceSettings settings =
@@ -122,8 +131,8 @@ public class RecaptchaContext {
         "Recaptcha Client was not created because no valid Auth Method was found.");
   }
 
-  public CompletableFuture<Assessment> createAssessmentAsync(
-      PasswordCheckVerification clientEncryptedCredentials) {
+  public CompletableFuture<VerificationResponse> createAssessmentAsync(
+      PasswordCheckVerification clientEncryptedCredentials, Assessment requestAssessment) {
     if (clientEncryptedCredentials.getLookupHashPrefix() == null
         || clientEncryptedCredentials.getEncryptedUserCredentialsHash() == null) {
       throw new IllegalArgumentException(Messages.INTERNAL_CREDENTIALS_ARE_NULL_MESSAGE);
@@ -139,20 +148,29 @@ public class RecaptchaContext {
                           clientEncryptedCredentials.getEncryptedUserCredentialsHash()))
                   .build();
 
-          Assessment requestAssessment =
-              Assessment.newBuilder().setPrivatePasswordLeakVerification(pldVerification).build();
-
           try {
+            Assessment mergeedRequest =
+                requestAssessment.toBuilder()
+                    .setPrivatePasswordLeakVerification(pldVerification)
+                    .build();
+
             Assessment responseAssessment =
                 recaptchaClient.createAssessment(
-                    "projects/" + config.getProjectId(), requestAssessment);
+                    "projects/" + config.getProjectId(), mergeedRequest);
 
-            return responseAssessment;
+            return new VerificationResponse(responseAssessment, clientEncryptedCredentials);
           } catch (ApiException apiException) {
-            throw apiException;
+            throw convertGrpcException(apiException);
           } catch (Exception e) {
             throw e;
           }
         });
+  }
+
+  public CompletableFuture<Assessment> createAssessmentAsync(
+      PasswordCheckVerification clientEncryptedCredentials) {
+    Assessment requestAssessment = Assessment.newBuilder().build();
+    return this.createAssessmentAsync(clientEncryptedCredentials, requestAssessment)
+        .thenApply(response -> response.getAssessment());
   }
 }

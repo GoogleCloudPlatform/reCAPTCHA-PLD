@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Build a .jar with maven and a custom JRE
-FROM maven:3-eclipse-temurin-23 as build
+FROM maven:3-eclipse-temurin-24 as build
 
 ARG VERSION=0.0.1-SNAPSHOT
 WORKDIR /build/

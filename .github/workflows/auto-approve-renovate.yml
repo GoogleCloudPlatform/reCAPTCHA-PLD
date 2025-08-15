@@ -19,6 +19,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           wait-interval: 30
+          ignore-checks: 'auto-approve'
       - name: Approve PR
         if: success()
         run: |

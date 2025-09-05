@@ -120,7 +120,7 @@ Credentials. Those credentials need to be passed in as a
 provided might vary depending on the development environment.
 
 First, follow the public docs at
-[Set up Application Default Credentials](http://cloud/docs/authentication/provide-credentials-adc).
+[Set up Application Default Credentials](https://cloud.google.com/docs/authentication/provide-credentials-adc).
 You will need an auth strategy that leaves you with a JSON file to mount inside
 the Container. For running locally, this can be created running `gcloud auth
 application-default login`. In other cases, you can use Workload Identity

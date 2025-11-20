@@ -9,7 +9,7 @@ jobs:
     # we are using ubuntu as it ships with docker pre-installed
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       # Our Dockerfile runs all of our Go Tests
       - name: Build and Test Docker Image
         run: docker build --tag pld-local .

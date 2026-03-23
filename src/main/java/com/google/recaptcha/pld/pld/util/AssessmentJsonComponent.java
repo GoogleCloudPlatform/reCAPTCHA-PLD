@@ -1,34 +1,44 @@
 package com.google.recaptcha.pld.pld.util;
 
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
-import com.fasterxml.jackson.databind.SerializerProvider;
+import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.google.recaptchaenterprise.v1.Assessment;
-import java.io.IOException;
-import org.springframework.boot.jackson.JsonComponent;
+import org.springframework.boot.jackson.JacksonComponent;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.core.JsonParser;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.ValueSerializer;
 
-@JsonComponent
+@JacksonComponent
 public class AssessmentJsonComponent {
-  public static class Serializer extends JsonSerializer<Assessment> {
+  public static class Serializer extends ValueSerializer<Assessment> {
     @Override
     public void serialize(
-        Assessment assessment, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
-        throws IOException {
-      jsonGenerator.writeString(JsonFormat.printer().print(assessment));
+        Assessment assessment, JsonGenerator jsonGenerator, SerializationContext serializationContext)
+        throws JacksonException {
+      try {
+        jsonGenerator.writeString(JsonFormat.printer().print(assessment));
+      } catch (InvalidProtocolBufferException e) {
+        throw new RuntimeException("Failed to serialize Assessment to JSON", e);
+      }
     }
   }
 
-  public static class Deserializer extends JsonDeserializer<Assessment> {
+  public static class Deserializer extends ValueDeserializer<Assessment> {
     @Override
     public Assessment deserialize(
-        JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
-      Assessment.Builder builder = Assessment.newBuilder();
-      JsonFormat.parser().merge(jsonParser.readValueAsTree().toString(), builder);
-      return builder.build();
+        JsonParser jsonParser, DeserializationContext deserializationContext)
+        throws JacksonException {
+      try {
+        Assessment.Builder builder = Assessment.newBuilder();
+        JsonFormat.parser().merge(jsonParser.readValueAsTree().toString(), builder);
+        return builder.build();
+      } catch (InvalidProtocolBufferException e) {
+        throw new RuntimeException("Failed to deserialize Assessment from JSON", e);
+      }
     }
   }
 }

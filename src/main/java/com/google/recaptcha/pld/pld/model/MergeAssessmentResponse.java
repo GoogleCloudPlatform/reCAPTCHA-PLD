@@ -13,9 +13,9 @@
 // limitations under the License.
 package com.google.recaptcha.pld.pld.model;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.google.recaptcha.pld.pld.util.AssessmentJsonComponent.Serializer;
 import com.google.recaptchaenterprise.v1.Assessment;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 public class MergeAssessmentResponse {
   @JsonSerialize(using = Serializer.class)

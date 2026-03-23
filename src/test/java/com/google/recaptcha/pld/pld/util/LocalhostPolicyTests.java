@@ -22,12 +22,15 @@ import com.google.recaptcha.pld.pld.model.Messages;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.TestPropertySource;
 
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = {PldEnvironment.class, LocalhostPolicy.class})
 @TestPropertySource(
     properties = {
@@ -37,7 +40,7 @@ import org.springframework.test.context.TestPropertySource;
       "pld.recaptchacontext.runinit=false",
     })
 public class LocalhostPolicyTests {
-  @MockBean private PldEnvironment env;
+  @MockitoBean private PldEnvironment env;
 
   @Autowired private LocalhostPolicy policy;
 
